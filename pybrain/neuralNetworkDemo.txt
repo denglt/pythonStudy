@@ -1,0 +1,90 @@
+# 神经网路学习步骤
+
+# 1、 创建一个简单 neural network ， 默认的hidden layer is sigmoid
+
+from pybrain.tools.shortcuts import buildNetwork
+net = buildNetwork(2, 3, 1)  # 两个 输入 ；3 个隐藏； 1 个输出 ，net 被随机数进行初始化
+
+net.activate([2, 1])  # 计算输出
+
+net['in']  # input
+net['hidden0']
+net['out']
+
+# 复杂的网络
+
+from pybrain.structure import TanhLayer
+from pybrain.structure import SoftmaxLayer
+net = buildNetwork(2, 3, 1, hiddenclass=TanhLayer)  # 指定 hidden layer
+net = buildNetwork(2, 3, 2, hiddenclass=TanhLayer, outclass=SoftmaxLayer)
+net.activate((2, 3))
+
+# 使用偏差
+net = buildNetwork(2, 3, 1, bias=True)
+net['bias']
+
+# 2、创建一个训练DataSet ，包含 inputs 和 targets
+
+from pybrain.datasets import SupervisedDataSet
+
+ds = SupervisedDataSet(2, 1) # two dimensional inputs and one dimensional targets.
+
+ds.addSample((0, 0), (0,))
+ds.addSample((0, 1), (1,))
+ds.addSample((1, 0), (1,))
+ds.addSample((1, 1), (0,))
+
+len(ds)
+
+for inpt, target in ds:
+    print(inpt, target)
+
+
+ds['input']
+ds['target']
+ds.clear()
+
+
+# 3、训练DataSet
+
+from pybrain.supervised.trainers import BackpropTrainer
+
+net = buildNetwork(2, 3, 1, bias=True, hiddenclass=TanhLayer)
+trainer = BackpropTrainer(net, ds)
+trainer.train()
+
+trainer.trainUntilConvergence() # 训练网络直到收敛
+
+# trainer.trainEpochs(epochs=100)  # epochs也就是训练集被训练遍历的次数
+
+
+
+from pybrain.datasets import SupervisedDataSet, UnsupervisedDataSet
+uds = UnsupervisedDataSet(2,)
+uds.addSample((0, 1), )
+uds.addSample((1, 1), )
+
+
+net.activateOnDataset(uds)
+
+>>> net.activateOnDataset(uds)
+array([[0.00255165],
+       [1.09804769]])
+>>> net.activate((0,1))
+array([1.09804769])
+>>> net.activate((1,1))
+array([0.00255165])
+
+
+trainer.testOnClassData(dataset=test_data)
+
+# 4、save and recover pybrain training 
+
+from pybrain.tools.customxml.networkwriter import NetworkWriter
+from pybrain.tools.customxml.networkreader import NetworkReader
+
+NetworkWriter.writeToFile(net, 'filename.xml')
+net = NetworkReader.readFrom('filename.xml') 
+
+
+
