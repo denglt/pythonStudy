@@ -9,19 +9,19 @@ from sklearn.metrics import f1_score
 X = np.load("./data/dataset.npy")
 y = np.load("./data/class.npy", allow_pickle=True)
 y = np.asarray(y,np.int64)
+y = y.reshape(y.shape[0], 1)
 
 # 将数据集切割成训练集和测试集。
 x_train, x_test, y_train, y_test = train_test_split(X, y, random_state=14)
 
 
-train_data = SupervisedDataSet(x_train.shape[1], 1)
-test_data = SupervisedDataSet(x_test.shape[1], 1)
+train_data = SupervisedDataSet(x_train.shape[1], y.shape[1])
+test_data = SupervisedDataSet(x_test.shape[1], y.shape[1])
 
 for i in range(x_train.shape[0]):
     train_data.addSample(x_train[i], y_train[i])
 for i in range(x_test.shape[0]):
     test_data.addSample(x_test[i], y_test[i])
-
 
 from pybrain.tools.customxml.networkreader import NetworkReader    
 

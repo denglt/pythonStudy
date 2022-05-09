@@ -49,20 +49,36 @@ NetworkWriter.writeToFile(net, './data/trainModel2.xml')
 predictions = trainer.testOnClassData(dataset=test_data)
 
 
-print("F-score: {0:.2f}".format(f1_score(predictions,y_test, average='micro')))    # F-score: 0.88
+print("F-score: {0:.2f}".format(f1_score(predictions,y_test, average='micro')))    # F-score: 0.10
+
+predictions_2 = net.activateOnDataset(test_data)
+predictions_2 = np.round(predictions_2)
+print("F-score: {0:.2f}".format(f1_score(predictions,y_test, average='micro')))    # F-score: 0.45
 
 
 '''
-使用下面数据测试
+修改narray
+for x in np.nditer(predictions_2, op_flags=['readwrite']): 
+    x[...]=2*x
+
+'''
+'''
 >>> y[100]
-'5'
+array([5])
 >>> aNumPic = X[100]
 >>> net.activate(aNumPic)
-array([7.17412375])
+array([5.18579342])
 >>> aNumPic = X[0]
 >>> net.activate(aNumPic)
-array([3.88733284])
+array([3.59858229])
 >>> y[0]
-'5'
+array([5])
+>>> test_data.clear()
+>>> test_data.addSample(aNumPic,y[0])
+>>> trainer.testOnClassData(dataset=test_data)
+[0]
+>>> trainer.testOnData(dataset=test_data)
+0.9819857927781355
+>>> net.activateOnDataset(test_data)
+array([[3.59858229]])
 '''
-

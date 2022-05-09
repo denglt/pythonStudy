@@ -84,7 +84,7 @@ from pybrain.tools.customxml.networkwriter import NetworkWriter
 from pybrain.tools.customxml.networkreader import NetworkReader
 
 NetworkWriter.writeToFile(net, 'filename.xml')
-net = NetworkReader.readFrom('filename.xml') 
+'filename.xml') 
 
 
 
