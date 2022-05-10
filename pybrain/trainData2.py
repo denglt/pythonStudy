@@ -10,12 +10,23 @@ from sklearn.metrics import f1_score
 
 
 
+print('正在读取训练数据并进行转化......')
+
 X = np.load("./data/dataset.npy")
 y = np.load("./data/class.npy", allow_pickle=True)
 y = np.asarray(y,np.int64)
 y = y.reshape(y.shape[0], 1)
 
-# 将数据集切割成训练集和测试集。
+onehotFlag = True
+if (onehotFlag):
+    print('正在对训练结果数据并进行One-Hot编码......')
+    #  进行 One-hot 编码
+    # False代表不生成稀疏矩阵
+    onehot = OneHotEncoder(sparse=False)  # One-Hot编码，又称为一位有效编码
+    y = onehot.fit_transform(y)
+
+
+print('正在将数据集切割成训练集和测试集......')
 x_train, x_test, y_train, y_test = train_test_split(X, y, random_state=14)
 
 
@@ -31,30 +42,47 @@ for i in range(x_test.shape[0]):
 
 
 # X.shape[1]代表属性的个数，100代表隐层中神经元的个数，
-net = buildNetwork(X.shape[1], 100, 1, bias=True)
+net = buildNetwork(X.shape[1], 100, y.shape[1], bias=True)
 
 # 反向传播(BP)算法
 trainer = BackpropTrainer(net, train_data, learningrate=0.01, weightdecay=0.01)
 
-
+print('开始进行深度学习......')
 trainer.trainEpochs(epochs=100)  # epochs也就是训练集被训练遍历的次数
 
 
 from pybrain.tools.customxml.networkwriter import NetworkWriter
 from pybrain.tools.customxml.networkreader import NetworkReader
 
-NetworkWriter.writeToFile(net, './data/trainModel2.xml')
+print('开始保存深度学习训练模型......')
 
-# 使用test_data 进行预测
-predictions = trainer.testOnClassData(dataset=test_data)
+if (onehotFlag):
+    NetworkWriter.writeToFile(net, './data/trainModel2_onehot.xml')
+else:    
+    NetworkWriter.writeToFile(net, './data/trainModel2.xml')
 
 
-print("F-score: {0:.2f}".format(f1_score(predictions,y_test, average='micro')))    # F-score: 0.10
 
-predictions_2 = net.activateOnDataset(test_data)
-predictions_2 = np.round(predictions_2)
-print("F-score: {0:.2f}".format(f1_score(predictions,y_test, average='micro')))    # F-score: 0.45
+print('正在对训练模型进行预测')
+if (onehotFlag):
+    # 使用test_data 进行预测
+    predictions = trainer.testOnClassData(dataset=test_data)
+    y_test_arry = y_test.argmax(axis=1)
+    print("F-score: {0:.2f}".format(f1_score(predictions,y_test_arry, average='micro'))) # F-score: 0.87
+    predictions_2 = net.activateOnDataset(test_data)
+    predictions_2 = predictions_2.argmax(axis=1)
+    print("F-score: {0:.2f}".format(f1_score(predictions_2,y_test_arry, average='micro')))    # F-score: 0.87
 
+else:
+    # 使用test_data 进行预测
+    predictions = trainer.testOnClassData(dataset=test_data)
+    print("F-score: {0:.2f}".format(f1_score(predictions,y_test, average='micro')))    # F-score: 0.10
+
+    predictions_2 = net.activateOnDataset(test_data)
+    predictions_2 = np.round(predictions_2)
+    print("F-score: {0:.2f}".format(f1_score(predictions_2,y_test, average='micro')))    # F-score: 0.45
+
+#  One-Hot编码与否的预测结果差这么大，why?
 
 '''
 修改narray

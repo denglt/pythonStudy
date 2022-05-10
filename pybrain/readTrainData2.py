@@ -35,3 +35,9 @@ predictions = trainer.testOnClassData(dataset=test_data)
 
 
 print("F-score: {0:.2f}".format(f1_score(predictions,y_test, average='micro')))   
+
+
+
+predictions_2 = net.activateOnDataset(test_data)
+predictions_2 = np.round(predictions_2)
+print("F-score: {0:.2f}".format(f1_score(predictions_2,y_test, average='micro')))    # F-score: 0.45
